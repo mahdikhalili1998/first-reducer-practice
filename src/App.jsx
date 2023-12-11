@@ -1,39 +1,39 @@
-import { useReducer } from "react";
+import { useEffect, useReducer } from "react";
+const intialstate = {
+  isloading: false,
+  data: [],
+  error: [],
+};
 const reducer = (state, action) => {
-  switch ((action, action.type)) {
-    case "increase":
-      return state + 1;
-    case "reset":
-      return (state = 0);
-    case "decrease":
-      return state - 1;
-    case "10plus":
-      return state + action.payload;
+  // console.log(state);
+  console.log(action);
+  switch (action.type) {
+    case "OK":
+      return { data: action.payload, isloading: true, erroe: [] };
+    case "LOST":
+      return { data: [], isloading: true, error: action.payload };
     default:
-      console.log("error darim dadash");
+      break;
   }
 };
 function App() {
-  const [count, dispatch] = useReducer(reducer, 0);
-  const dahHandler = () => {
-    dispatch({ type: "10plus", payload: 10 });
-  };
-  const increase = () => {
-    dispatch("increase");
-  };
-  const reset = () => {
-    dispatch("reset");
-  };
-  const decrease = () => {
-    dispatch("decrease");
-  };
+  const [state, dispatch] = useReducer(reducer, intialstate);
+  console.log(state);
+  useEffect(() => {
+    fetch("https://jsosnplaceholder.typicode.com/users")
+      .then((res) => res.json())
+      .then((json) => dispatch({ type: "OK", payload: json }))
+      .catch((error) => dispatch({ type: "LOST", payload: error.message }));
+  }, []);
   return (
     <>
-      <p>{count}</p>
-      <button onClick={increase}>increase</button>
-      <button onClick={reset}>reset</button>
-      <button onClick={dahHandler}>increase + 10</button>
-      <button onClick={decrease}>decrease</button>
+      {!state.isloading && <p>loading ...</p>}
+      <div>
+        {state.data.map((item) => (
+          <p key={item.id}>{item.name}</p>
+        ))}
+      </div>
+      <p>{state.error}</p>
     </>
   );
 }
